@@ -13,7 +13,7 @@ pokeRouter.use(auth);
 pokeRouter.get("/", async (req: Request, res: Response) => {
   try {
     // UserValidator.checkGetUserPayload(req.query);
-    const response = await pokemonRepository.getPokemonsV2();
+    const response = await pokemonRepository.getPokemons();
 
     return res.send(response);
   } catch (error) {}
