@@ -1,0 +1,7 @@
+.vscode
+node_modules
+environments/server.env
+environments/client.env
+package-lock.json
+.next
+build
