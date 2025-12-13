@@ -1,0 +1,27 @@
+services:
+  server:
+    build: ./server
+    volumes:
+      - ./server/src:/app/src
+      - ./server/package.json:/app/package.json
+      - ./server/package-lock.json:/app/package-lock.json
+    env_file:
+      - ./environments/server.env
+    ports:
+      - "8000:8000"
+
+  client:
+    build: ./client
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+      - /app/.next
+    env_file: ./environments/client.env
+    environment:
+      - WATCHPACK_POLLING=true
+    ports:
+      - "3001:3000"
+    depends_on:
+      - server

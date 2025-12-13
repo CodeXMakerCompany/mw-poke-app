@@ -3,7 +3,7 @@ import PokemonList from "./pages/home/pokemon_list";
 const base_url = process.env.NEXT_PUBLIC_SERVER_URL;
 
 async function getPokemons() {
-  const res = await fetch(`${base_url}/pokemons`, {
+  const res = await fetch(`${base_url}`, {
     cache: "no-store",
   });
 
