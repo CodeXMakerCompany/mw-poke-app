@@ -1,0 +1,9 @@
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "Client LINT check..."
+cd client && npm run lint || exit 'Client LINT FAILED'
+
+echo "Client Unit tests check..."
+cd client && npm test || exit 'Client Unit tests FAILED'
+
+echo "🐺 Client/Server LINT and Unit tests passed 🐺"
