@@ -4,11 +4,11 @@ output "server_api_endpoint" {
 }
 
 output "server_lambda_function" {
-  description = "Lambda function name"
+  description = "Lambda function"
   value       = aws_lambda_function.server.function_name
 }
 
 output "client_deployment_url" {
-  description = "Client url"
+  description = "CLIENT URL"
   value       = vercel_deployment.client_production.url
 }

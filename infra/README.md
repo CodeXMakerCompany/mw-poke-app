@@ -6,7 +6,21 @@
 2. **AWS Credentials**
 4. **GitHub Repository**
 
-## Setup
+## Envs Setup
+
+### 1. Set Environment Variables
+
+```bash
+export VERCEL_API_TOKEN=""
+export AWS_ACCESS_KEY_ID=""
+export AWS_SECRET_ACCESS_KEY=""
+```
+
+## Vercel Setup
+
+```bash
+Go to Vercel console and link Github acc where the respository is stored
+```
 
 ### 1. Set Environment Variables
 
@@ -27,7 +41,7 @@ git_branch  = "prod"
 
 ### 3. Install Server Dependencies
 
-The server needs `@vendia/serverless-express` for Lambda:
+The server will need `@vendia/serverless-express` for Lambda:
 
 ```bash
 cd ../server
@@ -48,9 +62,9 @@ terraform apply
 
 ## Outputs
 
-- `server_api_endpoint`: Your backend API URL
-- `server_lambda_function`: Lambda function name
-- `client_deployment_url`: Your frontend URL
+- `server_api_endpoint`
+- `server_lambda_function`
+- `client_deployment_url`
 
 ## Updating
 

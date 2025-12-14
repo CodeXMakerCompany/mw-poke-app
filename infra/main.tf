@@ -12,6 +12,10 @@ terraform {
       source  = "hashicorp/archive"
       version = "~> 2.0"
     }
+    null = {
+      source  = "hashicorp/null"
+      version = "~> 3.0"
+    }
   }
 }
 
@@ -23,12 +27,26 @@ provider "aws" {
 
 # SERVER
 
-# Zip generation
+# Build 
+resource "null_resource" "build_server" {
+  triggers = {
+    always_run = timestamp()
+  }
+
+  provisioner "local-exec" {
+    command     = "cd ../server && npm install && npm run build"
+    working_dir = path.module
+  }
+}
+
+# ZIP creation
 data "archive_file" "server_zip" {
   type        = "zip"
   source_dir  = "${path.module}/../server"
   output_path = "${path.module}/server-lambda.zip"
-  excludes    = ["node_modules", ".git", "*.md"]
+  excludes    = [".git", "*.md", "src", "tsconfig.json"]
+
+  depends_on = [null_resource.build_server]
 }
 
 # IAM Role
@@ -57,7 +75,7 @@ resource "aws_lambda_function" "server" {
   filename         = data.archive_file.server_zip.output_path
   function_name    = "mw-poke-app-server"
   role            = aws_iam_role.lambda_role.arn
-  handler         = "src/lambda.handler"
+  handler         = "dist/lambda.handler"
   source_code_hash = data.archive_file.server_zip.output_base64sha256
   runtime         = "nodejs20.x"
   timeout         = 30
@@ -85,6 +103,7 @@ resource "aws_lambda_function_url" "server_url" {
 }
 
 # CLIENT
+
 resource "vercel_project" "client" {
   name      = "mw-poke-app-client"
   framework = "nextjs"
@@ -98,7 +117,7 @@ resource "vercel_project" "client" {
 
   environment = [
     {
-      key    = "NEXT_PUBLIC_API_URL"
+      key    = "NEXT_PUBLIC_SERVER_URL"
       value  = aws_lambda_function_url.server_url.function_url
       target = ["production", "preview", "development"]
     }
@@ -111,6 +130,7 @@ resource "vercel_project" "client" {
 }
 
 resource "vercel_deployment" "client_production" {
+
   project_id = vercel_project.client.id
   production = true
   ref        = var.git_branch
