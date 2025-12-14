@@ -1,3 +1,4 @@
+import MediaPlayer from "./components/unique/mediaPlayer";
 import PokemonList from "./pages/home/pokemon_list";
 
 const base_url = process.env.NEXT_PUBLIC_SERVER_URL;
@@ -21,9 +22,12 @@ async function getPokemons() {
 export default async function Home() {
   const response = await getPokemons();
 
+
+
   return (
     <>
       <PokemonList pokemons={response.pokemons} />
+      <MediaPlayer />
     </>
   );
 }
