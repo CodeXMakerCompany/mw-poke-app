@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon -r tsconfig-paths/register src/index.ts",
+    "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -19,6 +20,7 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@vendia/serverless-express": "^4.12.6",
     "express": "^5.2.1",
     "tsconfig-paths": "^4.2.0"
   }

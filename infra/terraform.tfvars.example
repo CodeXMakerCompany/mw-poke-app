@@ -1,0 +1,3 @@
+github_repo = "username/repos-name"
+aws_region  = "us-east-1"
+git_branch  = "prod"
