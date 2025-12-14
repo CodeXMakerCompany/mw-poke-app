@@ -3,13 +3,11 @@ import PokemonList from "./pages/home/pokemon_list";
 const base_url = process.env.NEXT_PUBLIC_SERVER_URL;
 
 if (!base_url) {
-  console.log(process.env);
-
-  throw new Error("NEXT_PUBLIC_SERVER_URL environment variable is not set");
+  throw new Error("Server URL is not defined");
 }
 
 async function getPokemons() {
-  const res = await fetch(`${base_url}`, {
+  const res = await fetch(`${base_url}/pokemons`, {
     cache: "no-store",
   });
 
