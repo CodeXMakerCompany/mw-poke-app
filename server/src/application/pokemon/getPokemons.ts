@@ -19,6 +19,20 @@ interface DTOPokemonGETResponse {
   results: DTOPokemonItem[];
 }
 
+interface PokemonSourceData {
+  name: string;
+  types: Array<{ type: { name: string } }>;
+  sprites: {
+    front_default: string;
+    front_shiny: string;
+    other: {
+      "official-artwork": {
+        front_default: string;
+      };
+    };
+  };
+}
+
 let pokemonsWithDetailsCache: DTOResponsePokemonItem[] = [];
 
 const getLatestCountOfPokemons = async () => {
@@ -59,7 +73,7 @@ const getPokemonDetailsBatches = async (urls: string[], batch_size = 100) => {
 
     const batch_results = await Promise.all(
       pokemon_batch.map((url: string) =>
-        HttpInvoker.call<DTOPokemonGETResponse>(`${url}`, "GET")
+        HttpInvoker.call<PokemonSourceData>(`${url}`, "GET")
       )
     );
 
@@ -74,9 +88,9 @@ const getPokemonDetailsBatches = async (urls: string[], batch_size = 100) => {
   return results;
 };
 
-const pokemonDataAdapter = (pokemon: any): DTOResponsePokemonItem => {
+const pokemonDataAdapter = (pokemon: PokemonSourceData): DTOResponsePokemonItem => {
   const types =
-    pokemon?.types?.map((t: { type: { name: string } }) => t.type.name) || [];
+    pokemon?.types?.map((t) => t.type.name) || [];
   const image =
     pokemon?.sprites?.front_default ||
     pokemon?.sprites?.other["official-artwork"].front_default ||
