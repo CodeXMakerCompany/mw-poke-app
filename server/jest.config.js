@@ -11,4 +11,5 @@ module.exports = {
         '^@domain/(.*)$': '<rootDir>/src/domain/$1',
         '^@interfaces/(.*)$': '<rootDir>/src/interfaces/$1',
     },
+    modulePathIgnorePatterns: ['<rootDir>/dist/'],
 };
