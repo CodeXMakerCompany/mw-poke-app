@@ -1,11 +1,12 @@
 import pokemonUseCase from "@application/pokemon";
+import { PaginationParams } from "@application/pokemon/getPokemons";
 
 class PokemonsRepository {
   constructor() {}
 
-  async getPokemons() {
+  async getPokemons(paginationParams?: PaginationParams) {
     try {
-      const pokemons = await pokemonUseCase.getPokemonsUC();
+      const pokemons = await pokemonUseCase.getPokemonsUC(paginationParams);
 
       //DP
       // if (!) {}
@@ -13,7 +14,8 @@ class PokemonsRepository {
       return {
         status: 200,
         message: "Pokemons found",
-        pokemons: pokemons,
+        pokemons: pokemons.list,
+        pages: pokemons.pages.toFixed(0),
       };
     } catch (error) {
       console.log("POkemons list request failed:", error);

@@ -1,0 +1,2 @@
+export const DEFAULT_INITIAL_OFFSET = 0;
+export const DEFAULT_ITEMS_PAGINATION = 20;

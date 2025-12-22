@@ -13,14 +13,22 @@ pokeRouter.use(auth);
 pokeRouter.get("/", async (req: Request, res: Response) => {
   try {
     //TODO: Add params validation if we got them
-    const response = await pokemonRepository.getPokemons();
+    const limit = req.query?.limit as string;
+    const offset = req.query?.offset as string;
+    const keyword = req.query?.keyword as string;
+
+    const response = await pokemonRepository.getPokemons({
+      limit,
+      offset,
+      keyword,
+    });
 
     return res.send(response);
   } catch (error) {
-    console.log('Error on get pokemons route reason:', error);
+    console.log("Error on get pokemons route reason:", error);
 
     return res.status(400).send({
-      message: "We cant retrieve the pokemons at moment try later"
+      message: "We cant retrieve the pokemons at moment try later",
     });
   }
 });

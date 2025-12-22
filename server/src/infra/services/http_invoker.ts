@@ -37,4 +37,4 @@ class HttpInvoker {
   }
 }
 
-export default new HttpInvoker(); // 👈 singleton instance
+export default new HttpInvoker();

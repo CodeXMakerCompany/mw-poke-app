@@ -1,4 +1,7 @@
-import { POKEMON_BASE_URL } from "constants/pokemon";
+import {
+  POKEMON_BASE_URL,
+  POKEMON_DEFAULT_PAGINATION,
+} from "constants/pokemon";
 import HttpInvoker from "infra/services/http_invoker";
 
 interface DTOPokemonItem {
@@ -10,6 +13,11 @@ interface DTOResponsePokemonItem {
   name: string;
   types: string[];
   image: string;
+}
+
+interface DTOResponsePokemonList {
+  pages: number;
+  list: DTOResponsePokemonItem[];
 }
 
 interface DTOPokemonGETResponse {
@@ -33,6 +41,12 @@ interface PokemonSourceData {
   };
 }
 
+export interface PaginationParams {
+  limit?: string;
+  offset?: string;
+  keyword?: string;
+}
+
 let pokemonsWithDetailsCache: DTOResponsePokemonItem[] = [];
 
 const getLatestCountOfPokemons = async () => {
@@ -50,12 +64,27 @@ const getLatestCountOfPokemons = async () => {
   }
 };
 
-const getFullPokemonsList = async (pokemons_count: number) => {
+const getFullPokemonsList = async (
+  pokemons_count?: number | null,
+  paginationParams?: PaginationParams
+) => {
   try {
-    const response = await HttpInvoker.call<DTOPokemonGETResponse>(
-      `${POKEMON_BASE_URL}?limit=${pokemons_count}`,
-      "GET"
-    );
+    const offset = paginationParams?.offset;
+    // const keyword = paginationParams?.keyword;
+    let url = `${POKEMON_BASE_URL}?limit=${
+      pokemons_count || paginationParams?.limit
+    }`;
+
+    if (offset) {
+      url = url.concat(`&offset=${offset || POKEMON_DEFAULT_PAGINATION}`);
+    }
+
+    // if (keyword) {
+    //   url = url.concat(`search=${keyword}`);
+    // }
+    // console.log("server url", url);
+
+    const response = await HttpInvoker.call<DTOPokemonGETResponse>(url, "GET");
 
     return response.data.results;
   } catch (error) {
@@ -88,9 +117,10 @@ const getPokemonDetailsBatches = async (urls: string[], batch_size = 100) => {
   return results;
 };
 
-const pokemonDataAdapter = (pokemon: PokemonSourceData): DTOResponsePokemonItem => {
-  const types =
-    pokemon?.types?.map((t) => t.type.name) || [];
+const pokemonDataAdapter = (
+  pokemon: PokemonSourceData
+): DTOResponsePokemonItem => {
+  const types = pokemon?.types?.map((t) => t.type.name) || [];
   const image =
     pokemon?.sprites?.front_default ||
     pokemon?.sprites?.other["official-artwork"].front_default ||
@@ -103,20 +133,53 @@ const pokemonDataAdapter = (pokemon: PokemonSourceData): DTOResponsePokemonItem 
   };
 };
 
-const getPokemonsUseCaseV1 = async (): Promise<DTOResponsePokemonItem[]> => {
-  if (pokemonsWithDetailsCache.length) {
-    return pokemonsWithDetailsCache;
+const getPokemonsUseCaseV1 = async (
+  paginationParams?: PaginationParams
+): Promise<DTOResponsePokemonList> => {
+  const limit = paginationParams?.limit;
+  const offset = paginationParams?.offset;
+  const keyword = paginationParams?.keyword;
+
+  const isPaginated = limit && offset;
+
+  if (pokemonsWithDetailsCache.length && !isPaginated) {
+    return {
+      list: pokemonsWithDetailsCache,
+      pages: 0,
+    };
   }
+
   const count = await getLatestCountOfPokemons();
-  const pokemons_list = await getFullPokemonsList(count);
+
+  const pages = count / parseInt(limit as string);
+
+  const pokemons_list = await getFullPokemonsList(isPaginated ? null : count, {
+    ...(isPaginated && { limit, offset, keyword }),
+  });
+
+  if (keyword) {
+    const pokemon = await HttpInvoker.call<PokemonSourceData>(
+      `${POKEMON_BASE_URL}/${keyword}`,
+      "GET"
+    );
+    return {
+      list: [pokemonDataAdapter(pokemon.data)],
+      pages,
+    };
+  }
 
   const pokemons_with_details = await getPokemonDetailsBatches(
     pokemons_list.map((poke) => poke.url)
   );
 
-  pokemonsWithDetailsCache = pokemons_with_details;
+  if (!isPaginated) {
+    pokemonsWithDetailsCache = pokemons_with_details;
+  }
 
-  return pokemons_with_details;
+  return {
+    list: pokemons_with_details,
+    pages,
+  };
 };
 
 export default getPokemonsUseCaseV1;
